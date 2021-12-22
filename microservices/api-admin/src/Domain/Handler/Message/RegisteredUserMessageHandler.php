@@ -62,7 +62,6 @@ final class RegisteredUserMessageHandler
         }
 
         $jwtData = $this->addJwtData($consumer['id']);
-        $this->addKeyAuthData($consumer['id'], $message->getApiKey());
         $this->addAcl($consumer['id'], $message->getRoles());
 
         if (is_array($jwtData)) {
@@ -161,44 +160,6 @@ final class RegisteredUserMessageHandler
         }
 
         return null;
-    }
-
-    /**
-     * @param string $consumerId
-     * @param string|null $apiKey
-     * @return void
-     */
-    private function addKeyAuthData(string $consumerId, ?string $apiKey): void
-    {
-        if (!empty($apiKey)) {
-            try {
-                $response = $this->apiGatewayClient->request(
-                    'GET',
-                    sprintf('/consumers/%s/key-auth', $consumerId)
-                );
-
-                if ($response->getStatusCode() === Response::HTTP_OK) {
-                    $body = $response->toArray();
-                    if (empty($body['data'])) {
-                        $response = $this->apiGatewayClient->request(
-                            'POST',
-                            sprintf('/consumers/%s/key-auth', $consumerId),
-                            [
-                                'body' => json_encode([
-                                    'key' => $apiKey
-                                ])
-                            ]
-                        );
-
-                        if ($response->getStatusCode() !== Response::HTTP_CREATED) {
-                            error_log('API key not added for consumer with id '. $consumerId);
-                        }
-                    }
-                }
-            } catch (ExceptionInterface $exception) {
-                error_log($exception->getMessage());
-            }
-        }
     }
 
     /**
