@@ -1,0 +1,33 @@
+framework:
+    messenger:
+        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
+        failure_transport: failed
+
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            failed: 'doctrine://default?queue_name=failed'
+            # sync: 'sync://'
+            async_registered_user:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    delay: 2000
+                    max_retries: 5
+                    multiplier: 2
+                options:
+                    exchange:
+                        name: registered_users
+                        type: direct
+                    queues:
+                        registered_user: ~
+            async_api_consumer:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    exchange:
+                        name: api_consumers
+                        type: direct
+                    queues:
+                        new_api_consumer: ~
+
+        routing:
+            'App\Domain\Message\RegisteredUserMessage': async_registered_user
+            'App\Domain\Message\ApiConsumerMessage': async_api_consumer

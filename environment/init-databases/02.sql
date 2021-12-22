@@ -1,0 +1,4 @@
+CREATE DATABASE IF NOT EXISTS `tasks_db` COLLATE utf8mb4_general_ci;
+GRANT ALL PRIVILEGES ON `tasks_db`.* TO 'task'@'%';
+FLUSH PRIVILEGES;
+
